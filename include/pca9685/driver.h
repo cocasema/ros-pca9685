@@ -22,11 +22,14 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <simple_io/i2c.h>
-
 #include "params.h"
 
 #include <cstdint>
+#include <memory>
+
+namespace simple_io {
+class I2C;
+}
 
 namespace pca9685 {
 
@@ -58,7 +61,7 @@ public:
   bool set_duty_cycle(pin_t pin, value_t value);
 
 private:
-  simple_io::I2C i2c_;
+  std::unique_ptr<simple_io::I2C> i2c_;
 };
 
 } // namespace pca9685

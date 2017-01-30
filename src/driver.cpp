@@ -132,16 +132,16 @@ enum Mode1 : uint8_t {
  * PCA9685Driver
  */
 PCA9685Driver::PCA9685Driver(uint8_t i2c_bus, uint8_t i2c_address)
-  : i2c_(i2c_bus, i2c_address)
+  : i2c_(new simple_io::I2C(i2c_bus, i2c_address))
 {
   ROS_INFO("Driver: Created");
 
-  if (!i2c_.init()) {
+  if (!i2c_->init()) {
     ROS_ERROR("Driver: Failed to init i2c");
     return;
   }
 
-  if (!i2c_.write(Registers::MODE1, (uint8_t)0x00/*Mode1::AI*/)) {
+  if (!i2c_->write(Registers::MODE1, (uint8_t)0x00/*Mode1::AI*/)) {
     ROS_ERROR("Driver: Failed to reset MODE1");
     return;
   }
@@ -161,10 +161,10 @@ PCA9685Driver::set_frequency(frequency_t value)
 
   // The PRE_SCALE register can only be set when the SLEEP bit of MODE1 register is set to logic 1.
   uint8_t mode1 = 0;
-  if (!i2c_.read (Registers::MODE1,     &mode1)
-   || !i2c_.write(Registers::MODE1,     (uint8_t)((mode1 & ~Mode1::RESTART) | Mode1::SLEEP))
-   || !i2c_.write(Registers::PRE_SCALE, prescale)
-   || !i2c_.write(Registers::MODE1,     mode1)) {
+  if (!i2c_->read (Registers::MODE1,     &mode1)
+   || !i2c_->write(Registers::MODE1,     (uint8_t)((mode1 & ~Mode1::RESTART) | Mode1::SLEEP))
+   || !i2c_->write(Registers::PRE_SCALE, prescale)
+   || !i2c_->write(Registers::MODE1,     mode1)) {
     ROS_ERROR("Driver: Failed to read/update MODE1/PRE_SCALE");
     return false;
   }
@@ -175,7 +175,7 @@ PCA9685Driver::set_frequency(frequency_t value)
   // Timings on LEDn outputs are not guaranteed if PWM control registers are accessed within the 500 us window.
   usleep(500);
 
-  if (!i2c_.write(Registers::MODE1, (uint8_t)(mode1 | Mode1::AI))){
+  if (!i2c_->write(Registers::MODE1, (uint8_t)(mode1 | Mode1::AI))){
     ROS_ERROR("Driver: Failed to update MODE1 with AI");
     return false;
   }
@@ -234,7 +234,7 @@ PCA9685Driver::set_duty_cycle(pin_t pin, value_t value)
 
   ROS_DEBUG("Driver: Setting pin %u on=%u off=%u", *pin, on, off);
 
-  return i2c_.write(Registers::LED0_ON_L + 4 * pin, state);
+  return i2c_->write(Registers::LED0_ON_L + 4 * pin, state);
 }
 
 } // namespace pca9685
