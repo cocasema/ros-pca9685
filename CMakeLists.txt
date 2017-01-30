@@ -158,7 +158,7 @@ target_link_libraries(pca9685_node
   pca9685
 )
 
-set_property(TARGET pca9685_node PROPERTY CXX_STANDARD 11)
+set_property(TARGET pca9685_node PROPERTY CXX_STANDARD 14)
 set_property(TARGET pca9685_node PROPERTY CXX_STANDARD_REQUIRED ON)
 
 #############
